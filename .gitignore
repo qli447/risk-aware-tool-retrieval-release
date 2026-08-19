@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+code/checkpoints/
+code/embed_cache/
+*.pt
+*.pth
+*.ckpt
