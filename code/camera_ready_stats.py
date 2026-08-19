@@ -5,7 +5,8 @@ camera_ready_stats.py
 Camera-ready supplementary statistics. Read-only w.r.t. existing artifacts;
 writes results/camera_ready_stats_<tag>.{json,txt}.
 
-For the paper operating point (lam=0.1, alpha=0.1, K=1) this computes:
+For the paper operating point (lam=0.1, K=1; alpha=0.2 for UltraTool and
+alpha=0.02 for Seal-Tools) this computes:
   1. Paired significance tests (Wilcoxon signed-rank + sign-flip permutation +
      paired t) of Core / +Graph / +Rule vs the first-stage ToolRet-BGE ranking,
      on per-query metrics averaged over 3 seeds.
@@ -30,18 +31,14 @@ from run_graph_smooth import (ROOT, RVR_THR, load_samples, build_adj_matrix,
 RESULTS_DIR = ROOT / "results"
 CACHE_DIR = ROOT / "code/embed_cache"
 
-# Checkpoints behind the published Table 2. Verified empirically: the plain
-# ultra_toolret heads reproduce the published relevance level, whereas the
-# *_gcn_* / *_drgnn_dro_* variants do not — their relevance head expects
-# GCN-transformed tool embeddings, which the post-hoc smoothing pipeline in
-# run_graph_smooth.py does not apply.
+# Default checkpoints for the released hidden-size-64 learned-head setup.
 DEFAULT_CKPTS = {
     "ultratool": [f"code/checkpoints/reranker_ultra_toolret_seed{s}.pt"
                   for s in (123, 42, 777)],
-    "sealtools": [f"code/checkpoints/reranker_seal_toolret_h512_seed{s}.pt"
+    "sealtools": [f"code/checkpoints/reranker_seal_toolret_seed{s}.pt"
                   for s in (42, 123, 777)],
 }
-USE_COS_REL = {"ultratool": False, "sealtools": True}
+USE_COS_REL = {"ultratool": False, "sealtools": False}
 
 PQ_METRICS = ["ndcg@5", "sndcg@5", "mrr", "rvr@5", "srr@5", "success@5"]
 
@@ -49,9 +46,8 @@ PQ_METRICS = ["ndcg@5", "sndcg@5", "mrr", "rvr@5", "srr@5", "success@5"]
 # ── head-only loading + cached embeddings ─────────────────────────────────────
 # The encoder is frozen (model.py sets requires_grad=False), so only the two MLP
 # heads carry trained weights. We rebuild the heads directly from the checkpoint
-# and reuse the embedding caches written by the original runs. This reproduces
-# the published numbers exactly and avoids depending on the sentence-transformers
-# version that originally wrote the checkpoints.
+# and reuse embedding caches written by the training and evaluation scripts.
+# This avoids reloading the frozen encoder during the statistics pass.
 
 def load_heads(ckpt_path, device):
     ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
@@ -413,7 +409,7 @@ def run(args):
     repro = {}
     ref_file = {
         "ultratool": "results_graph_smooth_ultra_toolret_final_3seed.json",
-        "sealtools": "results_graph_smooth_seal_cosrel_sealrisk_h512_3seed.json",
+        "sealtools": "results_graph_smooth_sealtools_main.json",
     }[args.dataset]
     ref_path = RESULTS_DIR / ref_file
     if ref_path.exists() and not args.limit:
@@ -430,10 +426,10 @@ def run(args):
                     continue
                 pub = ref[block][key][metric]
                 now = sum(seed_avg(meth, metric)) / Q
-                repro[f"{block}_{metric}"] = {"published": pub, "recomputed": now,
+                repro[f"{block}_{metric}"] = {"reference": pub, "recomputed": now,
                                               "abs_diff": abs(pub - now)}
                 flag = "OK " if abs(pub - now) < 5e-3 else "DIFF"
-                print(f"  [{flag}] {block} {metric:10s} published={pub:.4f} "
+                print(f"  [{flag}] {block} {metric:10s} reference={pub:.4f} "
                       f"recomputed={now:.4f} diff={abs(pub-now):.5f}")
 
     print(f"\n=== Rule-filter stats (mean over seeds) ===")
