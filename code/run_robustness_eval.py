@@ -21,9 +21,9 @@ ToolGraph smoothing, and optional rule filtering.
 
 Usage:
   python code/run_robustness_eval.py \\
-      --checkpoints code/checkpoints/reranker_ultratool_seed42.pt \\
-                    code/checkpoints/reranker_ultratool_seed123.pt \\
-                    code/checkpoints/reranker_ultratool_seed777.pt \\
+      --checkpoints code/checkpoints/reranker_ultra_toolret_seed42.pt \\
+                    code/checkpoints/reranker_ultra_toolret_seed123.pt \\
+                    code/checkpoints/reranker_ultra_toolret_seed777.pt \\
       --tag robust_v1
 """
 
