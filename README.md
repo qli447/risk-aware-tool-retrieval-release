@@ -164,12 +164,26 @@ the paper.
 
 ## Risk labels
 
-The released labels use five ordinal levels. The distribution is:
+Risk labels use a five-level operational-risk rubric:
 
-| Dataset | Tools | L1 | L2 | L3 | L4 | L5 | L3-L5 |
+- **L1:** read-only tools with no side effects.
+- **L2:** reversible low-impact actions.
+- **L3:** elevated-permission tools or semi-sensitive data access.
+- **L4:** irreversible operations or highly sensitive or financial data access.
+- **L5:** severe-harm capabilities such as system intrusion or large-scale
+  privacy violations.
+
+The released label files contain the final resolved labels used for training
+and evaluation.
+
+## Label distribution
+
+The released final labels have the following risk-level distribution:
+
+| Dataset | Tools | L1 | L2 | L3 | L4 | L5 | High-risk tools (L3-L5) |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | UltraTool | 2,032 | 958 | 799 | 155 | 115 | 5 | 275 |
 | Seal-Tools | 4,076 | 2,807 | 1,197 | 51 | 20 | 1 | 72 |
 
-The annotation protocol, LLM agreement statistics, and independent human
-audit are reported in the paper.
+These are aggregate checks for the final released labels; the annotation
+protocol and agreement statistics are described in the paper appendix.
