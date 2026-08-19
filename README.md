@@ -169,7 +169,7 @@ Risk labels use a five-level operational-risk rubric:
 - **L1:** read-only tools with no side effects.
 - **L2:** reversible low-impact actions.
 - **L3:** elevated-permission tools or semi-sensitive data access.
-- **L4:** irreversible operations or highly sensitive or financial data access.
+- **L4:** irreversible operations or highly sensitive/financial data access.
 - **L5:** severe-harm capabilities such as system intrusion or large-scale
   privacy violations.
 
