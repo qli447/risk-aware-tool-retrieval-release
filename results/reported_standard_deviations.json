@@ -1,0 +1,25 @@
+{
+  "description": "Standard deviations over three random seeds for the paper's main, ablation, and stress-test results.",
+  "main": {
+    "ultratool": {
+      "core_graph": {"ndcg@5": 0.039, "mrr": 0.036, "sndcg@5": 0.046, "rvr@5": 0.028, "srr@5": 0.027},
+      "rule_filter": {"ndcg@5": 0.047, "mrr": 0.042, "sndcg@5": 0.060, "rvr@5": 0.011, "srr@5": 0.012}
+    },
+    "sealtools_test_in": {
+      "core_graph": {"ndcg@5": 0.005, "mrr": 0.001, "sndcg@5": 0.004, "rvr@5": 0.004, "srr@5": 0.001},
+      "rule_filter": {"ndcg@5": 0.003, "mrr": 0.001, "sndcg@5": 0.002, "rvr@5": 0.003, "srr@5": 0.001}
+    }
+  },
+  "ultratool_ablation": {
+    "risk_label_penalty": {"ndcg@5": 0.003, "sndcg@5": 0.002, "mrr": 0.002, "rvr@5": 0.039, "srr@5": 0.024},
+    "trained_f_rel": {"ndcg@5": 0.048, "sndcg@5": 0.052, "mrr": 0.047, "rvr@5": 0.017, "srr@5": 0.022},
+    "trained_f_risk": {"ndcg@5": 0.046, "sndcg@5": 0.052, "mrr": 0.041, "rvr@5": 0.029, "srr@5": 0.028},
+    "graph_smoothing": {"ndcg@5": 0.039, "sndcg@5": 0.046, "mrr": 0.036, "rvr@5": 0.028, "srr@5": 0.027},
+    "rule_filter": {"ndcg@5": 0.047, "sndcg@5": 0.060, "mrr": 0.042, "rvr@5": 0.011, "srr@5": 0.012}
+  },
+  "ultratool_stress_test": {
+    "toolret_bge": {"ndcg@5": 0.000, "rvr@5": 0.000, "srr@5": 0.000},
+    "graph_smoothing": {"ndcg@5": 0.008, "rvr@5": 0.097, "srr@5": 0.081},
+    "rule_filter": {"ndcg@5": 0.009, "rvr@5": 0.027, "srr@5": 0.019}
+  }
+}
