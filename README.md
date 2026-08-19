@@ -118,45 +118,116 @@ The graph files are generated locally with `build_skill_graph.py`.
 
 ## Reproduction
 
-Install dependencies and train the lightweight heads:
+Run the commands below from the repository root. Both datasets use the frozen
+ToolRet-BGE encoder and learned relevance and risk heads with hidden size 64.
+
+Install the dependencies:
 
 ```bash
-pip install -r code/requirements.txt
-python code/train_reranker.py --dataset ultratool --epochs 10 --mu 0.5
-python code/build_skill_graph.py --dataset ultratool --threshold 2 --sem-threshold 0.65
+python -m pip install -r code/requirements.txt
 ```
 
-Evaluate the main full-pool configuration:
+### UltraTool
+
+Train the three seeds and build the graph:
+
+```bash
+for seed in 42 123 777; do
+  python code/train_reranker.py \
+    --dataset ultratool \
+    --encoder mangopy/ToolRet-trained-bge-large-en-v1.5 \
+    --hidden 64 \
+    --epochs 10 \
+    --mu 0.5 \
+    --seed "$seed" \
+    --cache-dir "code/embed_cache/ultratool_seed${seed}" \
+    --save "code/checkpoints/reranker_ultra_toolret_seed${seed}.pt"
+done
+
+python code/build_skill_graph.py \
+  --dataset ultratool \
+  --threshold 2 \
+  --sem-threshold 0.65
+```
+
+Run the main full-pool evaluation:
 
 ```bash
 python code/run_graph_smooth.py \
   --dataset ultratool \
-  --checkpoints code/checkpoints/reranker_ultratool_seed42.pt \
-                code/checkpoints/reranker_ultratool_seed123.pt \
-                code/checkpoints/reranker_ultratool_seed777.pt \
+  --checkpoints code/checkpoints/reranker_ultra_toolret_seed42.pt \
+                code/checkpoints/reranker_ultra_toolret_seed123.pt \
+                code/checkpoints/reranker_ultra_toolret_seed777.pt \
   --lambda-values 0.1 \
   --alpha-values 0.2 \
   --K 1 \
   --tag ultratool_main
 ```
 
-Run the candidate-pool control with the same checkpoints:
+Run the candidate-matched top-100 evaluation with the same checkpoints:
 
 ```bash
 python code/topk_probe.py \
   --dataset ultratool \
-  --checkpoints code/checkpoints/reranker_ultratool_seed42.pt \
-                code/checkpoints/reranker_ultratool_seed123.pt \
-                code/checkpoints/reranker_ultratool_seed777.pt \
+  --checkpoints code/checkpoints/reranker_ultra_toolret_seed42.pt \
+                code/checkpoints/reranker_ultra_toolret_seed123.pt \
+                code/checkpoints/reranker_ultra_toolret_seed777.pt \
   --lam 0.1 \
   --alpha 0.2 \
   --K 1
 ```
 
-For Seal-Tools, use `--dataset sealtools` and the paper's graph-smoothing value
-`--alpha 0.02` (or `--alpha-values 0.02` for `run_graph_smooth.py`). Multiple
-checkpoint paths reproduce the reported three-seed means and standard
-deviations.
+### Seal-Tools
+
+Train the three seeds and build the graph:
+
+```bash
+for seed in 42 123 777; do
+  python code/train_reranker.py \
+    --dataset sealtools \
+    --encoder mangopy/ToolRet-trained-bge-large-en-v1.5 \
+    --hidden 64 \
+    --epochs 10 \
+    --mu 0.5 \
+    --seed "$seed" \
+    --cache-dir "code/embed_cache/sealtools_seed${seed}" \
+    --save "code/checkpoints/reranker_seal_toolret_seed${seed}.pt"
+done
+
+python code/build_skill_graph.py \
+  --dataset sealtools \
+  --threshold 2 \
+  --sem-threshold 0.65
+```
+
+Run the main full-pool evaluation on `test_in`:
+
+```bash
+python code/run_graph_smooth.py \
+  --dataset sealtools \
+  --split test_in \
+  --checkpoints code/checkpoints/reranker_seal_toolret_seed42.pt \
+                code/checkpoints/reranker_seal_toolret_seed123.pt \
+                code/checkpoints/reranker_seal_toolret_seed777.pt \
+  --lambda-values 0.1 \
+  --alpha-values 0.02 \
+  --K 1 \
+  --tag sealtools_main
+```
+
+Run the candidate-matched top-100 evaluation:
+
+```bash
+python code/topk_probe.py \
+  --dataset sealtools \
+  --split test_in \
+  --checkpoints code/checkpoints/reranker_seal_toolret_seed42.pt \
+                code/checkpoints/reranker_seal_toolret_seed123.pt \
+                code/checkpoints/reranker_seal_toolret_seed777.pt \
+  --lam 0.1 \
+  --alpha 0.02 \
+  --K 1
+```
 
 By default, the scripts use
 `mangopy/ToolRet-trained-bge-large-en-v1.5`, the frozen ToolRet-BGE encoder in
