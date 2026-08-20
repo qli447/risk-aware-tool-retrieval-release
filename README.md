@@ -3,6 +3,49 @@
 This repository contains the code and resolved tool-risk labels used in our
 CIKM 2026 paper, *Risk-Aware Reranking for Agentic Tool Retrieval*.
 
+## Contents
+
+- `code/model.py`: frozen-encoder dual-head reranker.
+- `code/train_reranker.py`: training for the relevance and risk heads.
+- `code/build_skill_graph.py`: construction of the four-type ToolGraph.
+- `code/run_graph_smooth.py`: full-pool deployment evaluation.
+- `code/topk_probe.py`: controlled full-pool/top-100 comparison and rule-filter
+  sensitivity.
+- `code/camera_ready_stats.py`: per-query uncertainty, significance, filter
+  activation, and timing statistics.
+- `code/run_robustness_eval.py`: subset and robustness evaluation utilities.
+- `code/requirements.txt`: Python dependencies.
+- `results/topk_probe_*.json`: the exact three-seed candidate-pool control
+  outputs, including the rule-filter sensitivity runs.
+- `data/ultratool/ultratool_risk_labels_resolved.json`: UltraTool risk labels.
+- `data/sealtools/sealtools_risk_labels_resolved.json`: Seal-Tools risk labels.
+
+## Risk labels
+
+Risk labels use a five-level operational-risk rubric:
+
+- **L1:** read-only tools with no side effects.
+- **L2:** reversible low-impact actions.
+- **L3:** elevated-permission tools or semi-sensitive data access.
+- **L4:** irreversible operations or highly sensitive/financial data access.
+- **L5:** severe-harm capabilities such as system intrusion or large-scale
+  privacy violations.
+
+The released label files contain the final resolved labels used for training
+and evaluation.
+
+## Label distribution
+
+The released final labels have the following risk-level distribution:
+
+| Dataset | Tools | L1 | L2 | L3 | L4 | L5 | High-risk tools (L3-L5) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| UltraTool | 2,032 | 958 | 799 | 155 | 115 | 5 | 275 |
+| Seal-Tools | 4,076 | 2,807 | 1,197 | 51 | 20 | 1 | 72 |
+
+These are aggregate checks for the final released labels; the annotation
+protocol and agreement statistics are described in the paper appendix.
+
 ## Method components
 
 The learned model has exactly two heads:
@@ -71,23 +114,6 @@ UltraTool stress-test results:
 | Graph smoothing | 0.008 | 0.097 | 0.081 |
 | Rule filter | 0.009 | 0.027 | 0.019 |
 
-## Contents
-
-- `code/model.py`: frozen-encoder dual-head reranker.
-- `code/train_reranker.py`: training for the relevance and risk heads.
-- `code/build_skill_graph.py`: construction of the four-type ToolGraph.
-- `code/run_graph_smooth.py`: full-pool deployment evaluation.
-- `code/topk_probe.py`: controlled full-pool/top-100 comparison and rule-filter
-  sensitivity.
-- `code/camera_ready_stats.py`: per-query uncertainty, significance, filter
-  activation, and timing statistics.
-- `code/run_robustness_eval.py`: subset and robustness evaluation utilities.
-- `code/requirements.txt`: Python dependencies.
-- `results/topk_probe_*.json`: the exact three-seed candidate-pool control
-  outputs, including the rule-filter sensitivity runs.
-- `data/ultratool/ultratool_risk_labels_resolved.json`: UltraTool risk labels.
-- `data/sealtools/sealtools_risk_labels_resolved.json`: Seal-Tools risk labels.
-
 ## Data layout
 
 The benchmark query and tool files are public upstream data and are not
@@ -120,6 +146,8 @@ The graph files are generated locally with `build_skill_graph.py`.
 
 Run the commands below from the repository root. Both datasets use the frozen
 ToolRet-BGE encoder and learned relevance and risk heads with hidden size 64.
+Pretrained checkpoints are not included. The training commands below create
+the checkpoint files used by the evaluation commands.
 
 Install the dependencies:
 
@@ -232,29 +260,3 @@ python code/topk_probe.py \
 By default, the scripts use
 `mangopy/ToolRet-trained-bge-large-en-v1.5`, the frozen ToolRet-BGE encoder in
 the paper.
-
-## Risk labels
-
-Risk labels use a five-level operational-risk rubric:
-
-- **L1:** read-only tools with no side effects.
-- **L2:** reversible low-impact actions.
-- **L3:** elevated-permission tools or semi-sensitive data access.
-- **L4:** irreversible operations or highly sensitive/financial data access.
-- **L5:** severe-harm capabilities such as system intrusion or large-scale
-  privacy violations.
-
-The released label files contain the final resolved labels used for training
-and evaluation.
-
-## Label distribution
-
-The released final labels have the following risk-level distribution:
-
-| Dataset | Tools | L1 | L2 | L3 | L4 | L5 | High-risk tools (L3-L5) |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| UltraTool | 2,032 | 958 | 799 | 155 | 115 | 5 | 275 |
-| Seal-Tools | 4,076 | 2,807 | 1,197 | 51 | 20 | 1 | 72 |
-
-These are aggregate checks for the final released labels; the annotation
-protocol and agreement statistics are described in the paper appendix.
